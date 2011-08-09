@@ -206,7 +206,7 @@
 		27CDEBF513C67C9B00C979BB /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		27CDEBF613C67C9B00C979BB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		27CDEBF913C67C9B00C979BB /* CouchCocoa-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CouchCocoa-Info.plist"; sourceTree = "<group>"; };
-		27CDEC0313C67C9B00C979BB /* CouchAPITests-Mac.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "CouchAPITests-Mac.octest"; path = "Mac Tests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		27CDEC0313C67C9B00C979BB /* Mac Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Mac Tests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		27CDEC3913C6806400C979BB /* CouchPrefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CouchPrefix.pch; sourceTree = "<group>"; };
 		27D5997813CE404300694B37 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		27DA430413B659A900BBADB7 /* RESTInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RESTInternal.h; sourceTree = "<group>"; };
@@ -341,7 +341,7 @@
 				2739BF2B13BCE53B004829CD /* libCouchCocoa.a */,
 				2739BF3613BCE53C004829CD /* iOS Tests.octest */,
 				27CDEBF113C67C9B00C979BB /* CouchCocoa.framework */,
-				27CDEC0313C67C9B00C979BB /* CouchAPITests-Mac.octest */,
+				27CDEC0313C67C9B00C979BB /* Mac Tests.octest */,
 				2784E1BC13CE5249009CC5C8 /* Shopping.app */,
 				27EEA59813D602EA00D7ACA4 /* CouchCocoa.framework */,
 			);
@@ -643,7 +643,7 @@
 			);
 			name = "Mac Tests";
 			productName = CouchAPITests;
-			productReference = 27CDEC0313C67C9B00C979BB /* CouchAPITests-Mac.octest */;
+			productReference = 27CDEC0313C67C9B00C979BB /* Mac Tests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
 		27EEA59713D602EA00D7ACA4 /* iOS Framework */ = {
@@ -961,7 +961,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
@@ -980,7 +980,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
@@ -1002,7 +1002,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1018,7 +1018,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1041,7 +1041,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1056,7 +1056,7 @@
 				DSTROOT = /tmp/iOS_Library.dst;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1083,7 +1083,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1104,7 +1104,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
@@ -1210,7 +1210,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1225,7 +1225,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1251,7 +1251,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1271,7 +1271,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};

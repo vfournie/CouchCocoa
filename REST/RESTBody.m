@@ -246,9 +246,7 @@ BIO *BIO_new_mem_buf(void *buf, int len);
 
 #if USE_JSONKIT
 #import "JSONKit.h"
-#endif
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1070 || __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_5_0)
 // Building against earlier SDK that doesn't contain NSJSONSerialization.h.
 // So declare the necessary bits here (copied from the 10.7 SDK):
 enum {
