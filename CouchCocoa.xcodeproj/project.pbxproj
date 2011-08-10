@@ -543,7 +543,7 @@
 			buildConfigurationList = 2731759B13CBA57B000FF426 /* Build configuration list for PBXLegacyTarget "Documentation" */;
 			buildPhases = (
 			);
-			buildToolPath = /opt/local/bin/doxygen;
+			buildToolPath = /usr/local/bin/doxygen;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
@@ -961,7 +961,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
@@ -980,7 +980,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
@@ -1002,7 +1002,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1018,7 +1018,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1041,7 +1041,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1056,7 +1056,7 @@
 				DSTROOT = /tmp/iOS_Library.dst;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1083,7 +1083,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1104,7 +1104,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				VALIDATE_PRODUCT = YES;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
@@ -1210,7 +1210,6 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1225,7 +1224,6 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1251,7 +1249,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1271,7 +1269,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos;
+				SDKROOT = iphoneos4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};
