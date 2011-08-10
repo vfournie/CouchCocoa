@@ -23,7 +23,7 @@
 {
     @private
     NSUInteger _limit, _skip;
-    id _startKey, _endKey;
+    id _startKey, _endKey, _key;
     BOOL _descending, _prefetch;
     NSArray *_keys;
     NSUInteger _groupLevel;
@@ -47,6 +47,9 @@
 
 /** If non-nil, the key value to end after. */
 @property (copy) id endKey;
+
+/** If non-nil, the key tp filter. */
+@property (copy) id key;
 
 /** If non-nil, the query will fetch only the rows with the given keys. */
 @property (copy) NSArray* keys;

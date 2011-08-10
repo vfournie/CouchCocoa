@@ -42,6 +42,7 @@
         _skip = query.skip;
         self.startKey = query.startKey;
         self.endKey = query.endKey;
+        self.key = query.key;
         _descending = query.descending;
         _prefetch = query.prefetch;
         self.keys = query.keys;
@@ -51,7 +52,7 @@
 }
 
 
-@synthesize limit=_limit, skip=_skip, descending=_descending, startKey=_startKey, endKey=_endKey,
+@synthesize limit=_limit, skip=_skip, descending=_descending, startKey=_startKey, endKey=_endKey, key=_key,
             prefetch=_prefetch, keys=_keys, groupLevel=_groupLevel;
 
 
@@ -83,6 +84,8 @@
         [params setObject: [RESTBody stringWithJSONObject: _startKey] forKey: @"?startkey"];
     if (_endKey)
         [params setObject: [RESTBody stringWithJSONObject: _endKey] forKey: @"?endkey"];
+    if (_key)
+        [params setObject: [RESTBody stringWithJSONObject: _key] forKey: @"?key"];
     if (_descending)
         [params setObject: @"true" forKey: @"?descending"];
     if (_prefetch)

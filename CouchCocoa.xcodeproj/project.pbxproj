@@ -1002,7 +1002,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1018,7 +1018,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1041,7 +1041,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1056,7 +1056,7 @@
 				DSTROOT = /tmp/iOS_Library.dst;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1083,7 +1083,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 			};
@@ -1104,7 +1104,7 @@
 					"\"$(SRCROOT)/../iOS-Couchbase/MobileCouchbase/Vendor/ios-openssl/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
@@ -1249,7 +1249,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};
@@ -1269,7 +1269,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				PRODUCT_NAME = CouchCocoa;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = framework;
 			};
