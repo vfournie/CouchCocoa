@@ -65,6 +65,11 @@
 - (void)couchTableSource:(CouchUITableSource*)source
      willUpdateFromQuery:(CouchLiveQuery*)query;
 
+/** Called from -tableView:cellForRowAtIndexPath: giving the delegate a chance to provide his own cell style.
+ If not implemented the style defaults to UITableViewCellStyleDefault. */
+- (UITableViewCell *)couchTableSource:(CouchUITableSource*)source
+                     createCellForRow:(CouchQueryRow*)row;
+ 
 /** Called from -tableView:cellForRowAtIndexPath: just before it returns, giving the delegate a chance to customize the new cell. */
 - (void)couchTableSource:(CouchUITableSource*)source
              willUseCell:(UITableViewCell*)cell

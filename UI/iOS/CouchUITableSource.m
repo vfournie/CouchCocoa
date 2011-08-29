@@ -148,16 +148,24 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier: @"CouchUITableDelegate"];
-    if (!cell)
-        cell = [[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
-                                      reuseIdentifier: @"CouchUITableDelegate"];
-    
     CouchQueryRow* row = [self rowAtIndex: indexPath.row];
+
+    id<UITableViewDelegate> delegate = _tableView.delegate;
+    UITableViewCell* cell;
+    // Allow the delegate to create the cell:
+    if([delegate respondsToSelector: @selector(couchTableSource:createCellForRow:)]){
+        cell = [(id<CouchUITableDelegate>)delegate couchTableSource:self createCellForRow:row];
+    } else {
+        // Delegate does not provide a cell use default one:
+        cell = [tableView dequeueReusableCellWithIdentifier: @"CouchUITableDelegate"];
+        if (!cell)
+            cell = [[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
+                                          reuseIdentifier: @"CouchUITableDelegate"];
+    }
+    
     cell.textLabel.text = [self labelForRow: row];
     
     // Allow the delegate to customize the cell:
-    id<UITableViewDelegate> delegate = _tableView.delegate;
     if ([delegate respondsToSelector: @selector(couchTableSource:willUseCell:forRow:)])
         [(id<CouchUITableDelegate>)delegate couchTableSource: self willUseCell: cell forRow: row];
     
