@@ -17,6 +17,11 @@
 #import "RESTInternal.h"
 
 
+#define COUCHLOG  if(gCouchLogLevel < 1) ; else NSLog
+#define COUCHLOG2 if(gCouchLogLevel < 2) ; else NSLog
+#define COUCHLOG3 if(gCouchLogLevel < 3) ; else NSLog
+
+
 @interface CouchAttachment ()
 - (id) initWithRevision: (CouchRevision*)revision 
                    name: (NSString*)name
@@ -50,6 +55,14 @@
 @end
 
 
+@interface CouchReplication ()
+- (id) initWithDatabase: (CouchDatabase*)database
+                 remote: (NSURL*)remote
+                   pull: (BOOL)pull
+                options: (CouchReplicationOptions)options;
+@end
+
+
 /** A query that allows custom map and reduce functions to be supplied at runtime.
     Usually created by calling -[CouchDatabase slowQueryWithMapFunction:]. */
 @interface CouchFunctionQuery : CouchQuery
@@ -58,6 +71,7 @@
 }
 
 - (id) initWithDatabase: (CouchDatabase*)db
-         viewDefinition: (struct CouchViewDefinition)definition;
-
+                    map: (NSString*)map
+                 reduce: (NSString*)reduce
+               language: (NSString*)language;
 @end

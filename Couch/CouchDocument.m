@@ -235,7 +235,7 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
     
     BOOL deleted = [[change objectForKey: @"deleted"] isEqual: (id)kCFBooleanTrue];
 
-    NSLog(@"**** CHANGE #%@: %@  %@ -> %@%@",
+    COUCHLOG(@"**** CHANGE #%@: %@  %@ -> %@%@",
           [change objectForKey: @"seq"], self, _currentRevisionID, rev,
           (deleted ?@" DELETED" :@""));
 
@@ -289,11 +289,12 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
 - (NSError*) operation: (RESTOperation*)op willCompleteWithError: (NSError*)error {
     error = [super operation: op willCompleteWithError: error];
     
-    if (op.httpStatus < 300) {
+    if (!error && op.httpStatus < 300) {
         // On a PUT or DELETE, update my current revision ID:
         if (op.isPUT || op.isDELETE) {
             NSString* rev = [op.responseBody.fromJSON objectForKey: @"rev"];
             self.currentRevisionID = rev;
+            op.resultObject = self.currentRevision;
             if (op.isDELETE)
                 self.isDeleted = YES;
         }

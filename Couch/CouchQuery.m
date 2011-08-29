@@ -149,13 +149,17 @@
 
 
 - (id) initWithDatabase: (CouchDatabase*)db
-         viewDefinition: (struct CouchViewDefinition)definition
+                    map: (NSString*)map
+                 reduce: (NSString*)reduce
+               language: (NSString*)language
 {
+    NSParameterAssert(map);
     self = [super initWithParent: db relativePath: @"_temp_view"];
     if (self != nil) {
         _viewDefinition = [[NSDictionary alloc] initWithObjectsAndKeys:
-                               definition.mapFunction, @"map",
-                               definition.reduceFunction, @"reduce",  // may be nil
+                               (language ?: kCouchLanguageJavaScript), @"language",
+                               map, @"map",
+                               reduce, @"reduce",  // may be nil
                                nil];
     }
     return self;
@@ -211,7 +215,7 @@
                                                          name: kCouchDatabaseChangeNotification 
                                                        object: self.database];
         }
-        NSLog(@"CouchLiveQuery: Starting...");
+        COUCHLOG(@"CouchLiveQuery: Starting...");
         _op = [[super start] retain];
         [_op start];
     }
@@ -219,17 +223,8 @@
 }
 
 
-- (void) updateRows {
-    if (_op)
-        return;  // TODO: Should probably re-run query after current _op completes, instead
-    if (_rows)
-        self.prefetch = NO;   // (prefetch disables conditional GET shortcut)
-    [self start];
-}
-
-
 - (void) databaseChanged {
-    [self updateRows];
+    [self start];
 }
 
 
@@ -237,13 +232,14 @@
     error = [super operation: op willCompleteWithError: error];
 
     if (op == _op) {
-        NSLog(@"CouchLiveQuery: ...Finished (status=%i)", op.httpStatus);
+        COUCHLOG(@"CouchLiveQuery: ...Finished (status=%i)", op.httpStatus);
         [_op release];
         _op = nil;
         CouchQueryEnumerator* rows = op.resultObject;
         if (rows && ![rows isEqual: _rows]) {
-            NSLog(@"CouchLiveQuery: ...Rows changed! (now %lu)", (unsigned long)rows.count);
+            COUCHLOG(@"CouchLiveQuery: ...Rows changed! (now %lu)", (unsigned long)rows.count);
             self.rows = rows;   // Triggers KVO notification
+            self.prefetch = NO;   // (prefetch disables conditional GET shortcut on next fetch)
         }
     }
     

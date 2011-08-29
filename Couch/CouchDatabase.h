@@ -14,21 +14,12 @@
 //  and limitations under the License.
 
 #import "CouchResource.h"
+#import "CouchReplication.h"
 @class RESTCache, CouchChangeTracker, CouchDocument, CouchDesignDocument, CouchQuery, CouchServer;
-struct CouchViewDefinition;
 
 
 /** Type of block that's called when the database changes. */
 typedef void (^OnDatabaseChangeBlock)(CouchDocument*);
-
-
-/** Option flags for replication (push/pull). */
-enum {
-    kCouchReplicationCreateTarget = 1,  /**< Create the destination database if it doesn't exist */
-    kCouchReplicationContinuous   = 2,  /**< Continuous mode; remains active till canceled */
-    kCouchReplicationCancel       = 4   /**< Cancel a current replication in progress */
-};
-typedef NSUInteger CouchReplicationOptions;
 
 
 /** A CouchDB database; contains CouchDocuments.
@@ -99,11 +90,16 @@ typedef NSUInteger CouchReplicationOptions;
 #pragma mark QUERIES & DESIGN DOCUMENTS:
 
 /** Returns a query that runs custom map/reduce functions.
-    This is very slow compared to a precompiled view and should only be used for testing. */
-- (CouchQuery*) slowQueryWithViewDefinition:(struct CouchViewDefinition)definition;
+    This is very slow compared to a precompiled view and should only be used for testing.
+    @param map  The map function source. Must not be nil.
+    @param reduce  The reduce function source, or nil for none.
+    @param language  The language of the functions, or nil for JavaScript. */
+- (CouchQuery*) slowQueryWithMap: (NSString*)map
+                          reduce: (NSString*)reduce
+                        language: (NSString*)language;
 
 /** Convenience method that creates a custom query from a JavaScript map function. */
-- (CouchQuery*) slowQueryWithMapFunction: (NSString*)mapFunctionSource;
+- (CouchQuery*) slowQueryWithMap: (NSString*)map;
 
 /** Instantiates a CouchDesignDocument object with the given ID.
     Makes no server calls; a design document with that ID doesn't even need to exist yet.
@@ -128,16 +124,16 @@ typedef NSUInteger CouchReplicationOptions;
 /** Triggers replication from a source database, to this database.
     @param sourceURL  The URL of the database to replicate from.
     @param options  Zero or more option flags affecting the replication.
-    @return  A RESTOperation that will complete when the replication finishes. The response body will be a JSON object describing what occurred. */
-- (RESTOperation*) pullFromDatabaseAtURL: (NSURL*)sourceURL 
-                                 options: (CouchReplicationOptions)options;
+    @return  The CouchReplication object managing the replication. It will already have been started. */
+- (CouchReplication*) pullFromDatabaseAtURL: (NSURL*)sourceURL
+                                    options: (CouchReplicationOptions)options;
 
 /** Triggers replication from this database to a target database.
     @param targetURL  The URL of the database to replicate to.
     @param options  Zero or more option flags affecting the replication.
-    @return  A RESTOperation that will complete when the replication finishes. The response body will be a JSON object describing what occurred. */
-- (RESTOperation*) pushToDatabaseAtURL: (NSURL*)targetURL
-                               options: (CouchReplicationOptions)options;
+    @return  The CouchReplication object managing the replication. It will already have been started. */
+- (CouchReplication*) pushToDatabaseAtURL: (NSURL*)targetURL
+                                  options: (CouchReplicationOptions)options;
 
 
 @end

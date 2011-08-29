@@ -22,6 +22,14 @@
 static NSString* const kLocalServerURL = @"http://127.0.0.1:5984/";
 
 
+int gCouchLogLevel = 0;
+
+
+@interface CouchServer ()
+@property (nonatomic, readwrite, retain) NSArray* activeTasks;
+@end
+
+
 @implementation CouchServer
 
 
@@ -37,6 +45,8 @@ static NSString* const kLocalServerURL = @"http://127.0.0.1:5984/";
 
 
 - (void)dealloc {
+    [_activeTasks release];
+    [_activityRsrc release];
     [_dbCache release];
     [super dealloc];
 }
@@ -86,6 +96,48 @@ static NSString* const kLocalServerURL = @"http://127.0.0.1:5984/";
         [db release];
     }
     return db;
+}
+
+
+@synthesize activeTasks=_activeTasks;
+
+
+- (void) pollActivity {
+    if (!_activityRsrc) {
+        _activityRsrc = [[RESTResource alloc] initWithParent:self relativePath:@"_active_tasks"];
+    }
+    RESTOperation* op = [_activityRsrc GET];
+    [op onCompletion: ^{
+        [_activityRsrc cacheResponse: op];
+        NSArray* tasks = $castIf(NSArray, op.responseBody.fromJSON);
+        if (tasks && ![tasks isEqual: _activeTasks]) {
+            COUCHLOG(@"CouchServer: activeTasks = %@", tasks);
+            self.activeTasks = tasks;    // Triggers KVO notification
+        }
+    }];
+}
+
+
+- (void) setActivityPollInterval: (NSTimeInterval)interval {
+    if (interval != self.activityPollInterval) {
+        [_activityPollTimer invalidate];
+        [_activityPollTimer release];
+        if (interval > 0) {
+            _activityPollTimer = [[NSTimer scheduledTimerWithTimeInterval: interval
+                                                                   target: self 
+                                                                 selector: @selector(pollActivity)
+                                                                 userInfo: NULL
+                                                                  repeats: YES] retain];
+            [self pollActivity];
+        } else {
+            _activityPollTimer = nil;
+        }
+    }
+}
+
+
+- (NSTimeInterval) activityPollInterval {
+    return _activityPollTimer ? _activityPollTimer.timeInterval : 0.0;
 }
 
 

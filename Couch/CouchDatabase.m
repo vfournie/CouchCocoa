@@ -188,14 +188,14 @@ static const NSUInteger kDocRetainLimit = 50;
     if (!_busyDocuments)
         _busyDocuments = [[NSCountedSet alloc] init];
     [_busyDocuments addObject: resource];
-    NSLog(@">>>>>> %lu docs being updated", (unsigned long)_busyDocuments.count);
+    COUCHLOG(@">>>>>> %lu docs being updated", (unsigned long)_busyDocuments.count);
 }
 
 
 - (void) endDocumentOperation: (CouchResource*)resource {
     NSAssert([_busyDocuments containsObject: resource], @"unbalanced endDocumentOperation call: %p %@", resource, resource);
     [_busyDocuments removeObject: resource];
-    NSLog(@"<<<<<< %lu docs being updated", (unsigned long)_busyDocuments.count);
+    COUCHLOG(@"<<<<<< %lu docs being updated", (unsigned long)_busyDocuments.count);
     if (_busyDocuments.count == 0)
         [self processDeferredChanges];
 }
@@ -220,51 +220,45 @@ static const NSUInteger kDocRetainLimit = 50;
 }
 
 
-- (CouchQuery*) slowQueryWithViewDefinition:(struct CouchViewDefinition)definition
+- (CouchQuery*) slowQueryWithMap: (NSString*)map
+                          reduce: (NSString*)reduce
+                        language: (NSString*)language
 {
     return [[[CouchFunctionQuery alloc] initWithDatabase: self
-                                          viewDefinition: definition] autorelease];
+                                                     map: map
+                                                  reduce: reduce
+                                                language: language] autorelease];
 }
 
-- (CouchQuery*) slowQueryWithMapFunction: (NSString*)mapFunctionSource {
-    CouchViewDefinition defn = {mapFunctionSource, nil, kCouchLanguageJavaScript};
-    return [self slowQueryWithViewDefinition: defn];
+- (CouchQuery*) slowQueryWithMap: (NSString*)map {
+    return [[[CouchFunctionQuery alloc] initWithDatabase: self
+                                                     map: map
+                                                  reduce: nil
+                                                language: nil] autorelease];
 }
 
 
 #pragma mark -
 #pragma mark REPLICATION & SYNCHRONIZATION
 
-- (RESTOperation*) replicateFrom: (NSString*)source 
-                              to: (NSString*)target
-                         options: (CouchReplicationOptions)options
-{
-    // http://wiki.apache.org/couchdb/Replication
-    NSParameterAssert(source);
-    NSParameterAssert(target);
-    NSMutableDictionary* body = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                          source, @"source",
-                          target, @"target",
-                          nil];
-    if (options & kCouchReplicationCreateTarget)
-        [body setObject: (id)kCFBooleanTrue forKey: @"create_target"];
-    if (options & kCouchReplicationContinuous)
-        [body setObject: (id)kCFBooleanTrue forKey: @"continuous"];
-    if (options & kCouchReplicationCancel)
-        [body setObject: (id)kCFBooleanTrue forKey: @"cancel"];
-    RESTResource* replicate = [[[RESTResource alloc] initWithParent: self.server 
-                                                       relativePath: @"_replicate"] autorelease];
-    return [replicate POSTJSON: body parameters: nil];
-}
-
-- (RESTOperation*) pullFromDatabaseAtURL: (NSURL*)sourceURL 
+- (CouchReplication*) pullFromDatabaseAtURL: (NSURL*)sourceURL 
                                  options: (CouchReplicationOptions)options {
-    return [self replicateFrom: sourceURL.absoluteString to: self.relativePath options: options];
+    CouchReplication* rep = [[[CouchReplication alloc] initWithDatabase: self
+                                                                 remote: sourceURL
+                                                                   pull: YES
+                                                                options: options] autorelease];
+    [rep start];
+    return rep;
 }
 
-- (RESTOperation*) pushToDatabaseAtURL: (NSURL*)targetURL
+- (CouchReplication*) pushToDatabaseAtURL: (NSURL*)targetURL
                                options: (CouchReplicationOptions)options {
-    return [self replicateFrom: self.relativePath to: targetURL.absoluteString options: options];
+    CouchReplication* rep = [[[CouchReplication alloc] initWithDatabase: self
+                                                                 remote: targetURL
+                                                                   pull: NO
+                                                                options: options] autorelease];
+    [rep start];
+    return rep;
 }
 
 
@@ -315,7 +309,7 @@ static NSString* const kTrackingPath = @"_changes?feed=continuous";
     if (_busyDocuments.count) {
         // Don't process changes while I have pending PUT/POST/DELETEs out. Wait till they finish,
         // so I don't think the change is external.
-        NSLog(@"CouchDatabase deferring change (seq %lu) till operations finish", 
+        COUCHLOG(@"CouchDatabase deferring change (seq %lu) till operations finish", 
               (unsigned long)sequence);
         if (!_deferredChanges)
             _deferredChanges = [[NSMutableArray alloc] init];
@@ -340,7 +334,7 @@ static NSString* const kTrackingPath = @"_changes?feed=continuous";
                                                    coalesceMask: NSNotificationCoalescingOnSender
                                                        forModes: modes];
     } else {
-        NSLog(@"CouchDatabase change with seq=%lu already known", (unsigned long)sequence);
+        COUCHLOG(@"CouchDatabase change with seq=%lu already known", (unsigned long)sequence);
     }
     
     _lastSequenceNumber = sequence;

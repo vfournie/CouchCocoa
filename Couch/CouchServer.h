@@ -22,6 +22,9 @@
 {
     @private
     RESTCache* _dbCache;
+    RESTResource* _activityRsrc;
+    NSArray* _activeTasks;
+    NSTimer* _activityPollTimer;
 }
 
 /** Initialize given a server URL. */
@@ -44,4 +47,20 @@
     Multiple calls with the same name will return the same CouchDatabase instance. */
 - (CouchDatabase*) databaseNamed: (NSString*)name;
 
+#pragma mark ACTIVITY:
+
+/** The list of active server tasks, as parsed JSON (observable).
+    This is updated asynchronously while the activityPollInterval is nonzero. */
+@property (nonatomic, readonly, retain) NSArray* activeTasks;
+
+/** How often to poll the server's list of active tasks and update .activeTasks. */
+@property NSTimeInterval activityPollInterval;
+
 @end
+
+
+/** The current level of logging used by CouchCocoa.
+    Default value is 0, which disables logging.
+    Set to 1 for some logging, or 2 or 3 for more.
+    See also: gRESTLogLevel, which logs HTTP requests/responses. */
+extern int gCouchLogLevel;

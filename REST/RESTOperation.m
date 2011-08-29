@@ -31,6 +31,9 @@ NSString* const CouchHTTPErrorDomain = @"CouchHTTPError";
 
 static NSString* const kRESTObjectRunLoopMode = @"RESTOperation";
 
+static const NSTimeInterval kRetryDelay = 0.5;
+static const unsigned kMaxRetries = 3;
+
 
 RESTLogLevel gRESTLogLevel = kRESTLogNothing;
 
@@ -63,8 +66,11 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
     [_connection cancel];
     [_connection release];
     [_request release];
+    [_response release];
     [_error release];
     [_resource release];
+    [_onCompletes release];
+    [_body release];
     [super dealloc];
 }
 
@@ -138,22 +144,16 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
 #pragma mark LOADING:
 
 
-- (void) _close {
-    [_connection cancel];
-    [_connection release];
-    _connection = nil;
-
-    [_body release];
-    _body = nil;
-}
-
-
-- (BOOL) start {
+- (void) start {
     if (_state != kRESTObjectUnloaded)
-        return NO;
+        return;
 
     if (gRESTLogLevel >= kRESTLogRequestURLs) {
-        NSLog(@"REST: >> %@ %@", _request.HTTPMethod, _request.URL);
+        NSMutableString* message = [NSMutableString stringWithFormat: @"%@ %@", 
+                                    _request.HTTPMethod, _request.URL];
+        if (_retryCount > 0)
+            [message appendFormat: @" [#%u]", _retryCount+1];
+        NSLog(@"REST: >> %@", message);
         if (gRESTLogLevel >= kRESTLogRequestHeaders) {
             NSDictionary* headers = _request.allHTTPHeaderFields;
             for (NSString* key in headers)
@@ -169,7 +169,8 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
     [_connection start];
     self.error = nil;
     _state = kRESTObjectLoading;
-    return YES;
+    
+    [_resource operationDidStart: self];
 }
 
 
@@ -180,17 +181,55 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
         CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
         
         _waiting = YES;
-        while (_connection && _state == kRESTObjectLoading) {
+        while (_state == kRESTObjectLoading) {
             if (![[NSRunLoop currentRunLoop] runMode: kRESTObjectRunLoopMode
                                           beforeDate: [NSDate distantFuture]])
                 break;
         }
-        _waiting = NO;
 
         if (gRESTLogLevel >= kRESTLogRequestURLs)
             NSLog(@"REST: Blocked for %.1f ms", (CFAbsoluteTimeGetCurrent() - start)*1000.0);
     }
     return _state == kRESTObjectReady;
+}
+
+
++ (BOOL) wait: (NSSet*)operations {
+    if (operations.count == 0)
+        return YES;
+    operations = [[operations copy] autorelease];   // make sure set doesn't mutate
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+
+    // Mark each active operation as waiting:
+    for (RESTOperation* op in operations)
+        if (op->_state == kRESTObjectLoading)
+            op->_waiting = YES;
+    
+    // Loop till all operations have finished:
+    do {
+        int numWaiting = 0;
+        for (RESTOperation* op in operations) {
+            if (op->_waiting) 
+                ++numWaiting;
+        }
+        if (numWaiting == 0)
+            break;
+        if (gRESTLogLevel >= kRESTLogRequestURLs)
+            NSLog(@"Blocking on %i RESTOperations...", numWaiting);
+    } while ([[NSRunLoop currentRunLoop] runMode: kRESTObjectRunLoopMode
+                                      beforeDate: [NSDate distantFuture]]);
+    
+    if (gRESTLogLevel >= kRESTLogRequestURLs)
+        NSLog(@"REST: Blocked on %u ops for %.1f ms", 
+              (unsigned)operations.count,
+              (CFAbsoluteTimeGetCurrent() - start)*1000.0);
+
+    // Return YES if all operations were successful:
+    for (RESTOperation* op in operations) {
+        if (op->_state != kRESTObjectReady)
+            return NO;
+    }
+    return YES;
 }
 
 
@@ -211,7 +250,59 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
 }
 
 
+@synthesize retryCount=_retryCount;
+
+
+// Returns YES if the connection should be retried.
+- (BOOL) shouldRetryAfterError: (NSError*)error {
+    if (!error || _retryCount >= kMaxRetries)
+        return NO;
+    // Retry after NSURLErrorCannotConnectToHost (ECONN) because the embedded server might
+    // not have finished [re]launching yet.
+    if ([error.domain isEqualToString: NSURLErrorDomain] 
+            && error.code == NSURLErrorCannotConnectToHost)
+        return YES;
+    return NO;
+}
+
+
+- (BOOL) retry {
+    if (_retryCount >= kMaxRetries)
+        return NO;
+    ++_retryCount;
+    [_connection cancel];
+    [_connection release];
+    _connection = nil;
+    [_error release];
+    _error = nil;
+    [_response release];
+    _response = nil;
+    [_body release];
+    _body = nil;
+    [_resultObject release];
+    _resultObject = nil;
+    _state = kRESTObjectUnloaded;
+    // Don't clear _waiting -- if client was waiting, it's still waiting
+    
+    [self start];
+    return YES;
+}
+
+
 - (void) completedWithError: (NSError*)error {
+    if ([self shouldRetryAfterError: error]) {
+        // Retry, after a delay, on specific errors:
+        NSTimeInterval delay = kRetryDelay * (1 << _retryCount);
+        if (gRESTLogLevel >= kRESTLogRequestURLs)
+            NSLog(@"REST:    Error = %@, will retry in %.1lf sec...",
+                  error.localizedDescription, delay);
+        [self performSelector: @selector(retry) withObject: nil 
+                   afterDelay: delay
+                      inModes: [NSArray arrayWithObjects: NSRunLoopCommonModes,
+                                                          kRESTObjectRunLoopMode, nil]];
+        return;
+    }
+    
     if (!_waiting &&
             [[[NSRunLoop currentRunLoop] currentMode] isEqualToString: kRESTObjectRunLoopMode]) {
         // If another RESTOperation is blocked in -wait, don't call out to client code until after
@@ -221,6 +312,7 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
                    afterDelay: 0.0 inModes: [NSArray arrayWithObject: NSRunLoopCommonModes]];
         return;
     }
+    _waiting = NO;
     
     [_connection release];
     _connection = nil;
@@ -243,6 +335,8 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
     _onCompletes = nil;
     for (OnCompleteBlock onComplete in onCompletes)
         onComplete();
+    
+    [_resource operationDidComplete: self];
 }
 
 
