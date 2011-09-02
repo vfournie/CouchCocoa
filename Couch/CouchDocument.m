@@ -195,14 +195,19 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
 }
 
 
-- (RESTOperation*) putProperties: (NSDictionary*)properties {
+- (RESTOperation*) putProperties: (NSDictionary*)properties parameters:(NSDictionary*)parameters {
     NSParameterAssert(properties != nil);
     
     if (_currentRevisionID && ![properties objectForKey: @"_rev"]) {
         Warn(@"Trying to PUT to %@ without specifying a rev ID", self);
     }
     
-    return [self PUTJSON: properties parameters: nil];
+    return [self PUTJSON: properties parameters: parameters];
+    
+}
+
+- (RESTOperation*) putProperties: (NSDictionary*)properties {
+    return [self putProperties: properties parameters: nil];
 }
 
 

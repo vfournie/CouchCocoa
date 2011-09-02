@@ -78,6 +78,7 @@
     You should be prepared for the operation to fail with a 412 status, indicating that a newer revision has already been added by another client.
     In this case you need to call -currentRevision again, to get that newer revision, incorporate any changes into your properties dictionary, and try again. (This is not the same as a conflict resulting from synchronization. Those conflicts result in multiple versions of a document appearing in the database; but in this case, you were prevented from creating a conflict.) */
 - (RESTOperation*) putProperties: (NSDictionary*)properties;
+- (RESTOperation*) putProperties: (NSDictionary*)properties parameters:(NSDictionary*)parameters;
 
 #pragma mark CONFLICTS:
 
