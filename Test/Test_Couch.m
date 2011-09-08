@@ -16,58 +16,14 @@
 #import "CouchInternal.h"
 #import "CouchDesignDocument.h"
 #import "RESTInternal.h"
+#import "CouchTestCase.h"
 
 
-#import <SenTestingKit/SenTestingKit.h>
-
-
-// Waits for a RESTOperation to complete and raises an assertion failure if it got an error.
-#define AssertWait(OP) ({RESTOperation* i_op = (OP);\
-                        STAssertTrue([i_op wait], @"%@ failed: %@", i_op, i_op.error);\
-                        i_op = i_op;})
-
-
-@interface Test_Couch : SenTestCase
-{
-    CouchServer* _server;
-    CouchDatabase* _db;
-}
+@interface Test_Couch : CouchTestCase
 @end
 
 
 @implementation Test_Couch
-
-
-- (void) setUp {
-    gRESTWarnRaisesException = YES;
-    [self raiseAfterFailure];
-
-    _server = [[CouchServer alloc] init];  // local server
-    STAssertNotNil(_server, @"Couldn't create server object");
-    _server.tracksActiveOperations = YES;
-    
-    _db = [[_server databaseNamed: @"testdb_temporary"] retain];
-    STAssertNotNil(_db, @"Couldn't create database object");
-    RESTOperation* op = [_db create];
-    if (![op wait]) {
-        NSLog(@"NOTE: DB '%@' exists; deleting and re-creating it for tests", _db.relativePath);
-        STAssertEquals(op.httpStatus, 412,
-                       @"Unexpected error creating db: %@", op.error);
-        AssertWait([_db DELETE]);
-        AssertWait([_db create]);
-    }
-
-    gRESTLogLevel = kRESTLogRequestHeaders; // kRESTLogNothing;
-}
-
-
-- (void) tearDown {
-    gRESTLogLevel = kRESTLogNothing;
-    AssertWait([_db DELETE]);
-    STAssertEquals(_server.activeOperations.count, (NSUInteger)0, nil);
-    [_db release];
-    [_server release];
-}
 
 
 - (CouchDocument*) createDocumentWithProperties: (NSDictionary*)properties {
@@ -434,19 +390,19 @@
     STAssertFalse(design.changed, nil);
     STAssertEqualObjects(design.viewNames, [NSArray array], nil);
     [design defineViewNamed: @"vu" map: @"function(doc){emit(doc.name,null);};"
-                     reduce: @"_count" language: nil];
+                     reduce: @"_count"];
     STAssertEqualObjects(design.viewNames, [NSArray arrayWithObject: @"vu"], nil);
     STAssertEqualObjects([design mapFunctionOfViewNamed: @"vu"],
                          @"function(doc){emit(doc.name,null);};", nil);
     STAssertEqualObjects([design reduceFunctionOfViewNamed: @"vu"], @"_count", nil);
-    STAssertEqualObjects([design languageOfViewNamed: @"vu"], kCouchLanguageJavaScript, nil);
+    STAssertEqualObjects(design.language, kCouchLanguageJavaScript, nil);
 
     STAssertTrue(design.changed, nil);
     AssertWait([design saveChanges]);
     STAssertFalse(design.changed, nil);
 
     [design defineViewNamed: @"vu" map: @"function(doc){emit(doc.name,null);};"
-                     reduce: @"_count" language: nil];
+                     reduce: @"_count"];
     STAssertFalse(design.changed, nil);
     STAssertNil([design saveChanges], nil);
 
@@ -506,7 +462,7 @@
 - (void) test15_UncacheViews {
     CouchDesignDocument* design = [_db designDocumentWithName: @"mydesign"];
     [design defineViewNamed: @"vu" map: @"function(doc){emit(doc.name,null);};"
-                     reduce: @"_count" language: nil];
+                     reduce: @"_count"];
     AssertWait([design saveChanges]);
 
     // Delete the view without going through the view API:
@@ -516,6 +472,26 @@
     
     // Verify that the view API knows it's gone:
     STAssertEqualObjects(design.viewNames, [NSArray array], nil);
+}
+
+
+- (void) test13_Validation {
+    CouchDesignDocument* design = [_db designDocumentWithName: @"mydesign"];
+    design.validation = @"function(doc,oldDoc,user){if(!doc.groovy) throw({forbidden:'uncool'});}";
+    AssertWait([design saveChanges]);
+    
+    NSMutableDictionary* properties = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       @"right on", @"groovy",
+                                       @"bar", @"foo", nil];
+    CouchDocument* doc = [_db untitledDocument];
+    AssertWait([doc putProperties: properties]);
+    
+    [properties removeObjectForKey: @"groovy"];
+    doc = [_db untitledDocument];
+    RESTOperation* op = [doc putProperties: properties];
+    STAssertFalse([op wait], nil);
+    STAssertEquals(op.error.code, (NSInteger)403, nil);
+    STAssertEqualObjects(op.error.localizedDescription, @"forbidden: uncool", nil);
 }
 
 
