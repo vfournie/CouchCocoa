@@ -42,6 +42,19 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
 }
 
 
+- (NSString*) abbreviatedID {
+    NSMutableString* abbrev = [[self.documentID mutableCopy] autorelease];
+    if (abbrev.length > 10)
+        [abbrev replaceCharactersInRange: NSMakeRange(4, abbrev.length - 8) withString: @".."];
+    return abbrev;
+}
+
+
+- (NSString*) description {
+    return [NSString stringWithFormat: @"%@[%@]", [self class], self.abbreviatedID];
+}
+
+
 #pragma mark REVISIONS:
 
 
@@ -76,8 +89,10 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
         if (_currentRevisionID)
             _currentRevision = [[CouchRevision alloc] initWithDocument: self
                                                             revisionID: _currentRevisionID];
-        else if (self.relativePath)
+        else if (self.relativePath) {
             _currentRevision = [[CouchRevision alloc] initWithOperation: [self GET]];
+            _currentRevisionID = [_currentRevision.revisionID copy];
+        }
     }
     return _currentRevision;
 }

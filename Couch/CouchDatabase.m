@@ -16,7 +16,6 @@
 #import "CouchDatabase.h"
 #import "RESTCache.h"
 #import "CouchChangeTracker.h"
-#import "CouchDesignDocument.h"
 #import "CouchInternal.h"
 
 
@@ -61,7 +60,17 @@ static const NSUInteger kDocRetainLimit = 50;
 
 
 - (RESTOperation*) create {
-    return [self PUT: nil parameters: nil];
+    return [[self PUT: nil parameters: nil] start];
+}
+
+
+- (RESTOperation*) compact {
+    // http://wiki.apache.org/couchdb/Compaction
+    CouchResource* rsrc = [[[CouchResource alloc] initWithParent: self relativePath: @"_compact"]
+                           autorelease];
+    NSDictionary* params = [NSDictionary dictionaryWithObject: @"application/json"
+                                                       forKey: @"Content-Type"];
+    return [[rsrc POST: nil parameters: params] start];
 }
 
 
@@ -260,6 +269,50 @@ static const NSUInteger kDocRetainLimit = 50;
     [rep start];
     return rep;
 }
+
+
+- (NSArray*) replications {
+    NSString* myPath = self.relativePath;
+    return [self.server.replications rest_map: ^(id repl) {
+        if ([[repl source] isEqualToString: myPath] || [[repl target] isEqualToString: myPath])
+            return repl;
+        else
+            return nil;
+    }];
+}
+
+
+- (CouchPersistentReplication*) replicationFromDatabaseAtURL: (NSURL*)sourceURL {
+    return [self.server replicationWithSource: sourceURL.absoluteString target: self.relativePath];
+}
+
+- (CouchPersistentReplication*) replicationToDatabaseAtURL: (NSURL*)targetURL {
+    return [self.server replicationWithSource: self.relativePath target: targetURL.absoluteString];
+}
+
+
+- (NSArray*) replicateWithURL: (NSURL*)targetURL exclusively: (BOOL)exclusively {
+    NSMutableArray* repls = nil;
+    if (targetURL) {
+        CouchPersistentReplication* from = [self replicationFromDatabaseAtURL: targetURL];
+        CouchPersistentReplication* to = [self replicationToDatabaseAtURL: targetURL];
+        if (!from || !to)
+            return nil;
+        if (from.isNew)
+            from.continuous = YES;  // New replications are continuous by default
+        if (to.isNew)
+            to.continuous = YES;
+        repls = [NSMutableArray arrayWithObjects: from, to, nil];
+    }
+    if (exclusively) {
+        for (CouchPersistentReplication* repl in self.replications) {
+            if (!repls || [repls indexOfObjectIdenticalTo: repl] == NSNotFound)
+                [repl deleteDocument];
+        }
+    }
+    return repls;
+}
+
 
 
 #pragma mark -
