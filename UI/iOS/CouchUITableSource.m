@@ -159,8 +159,9 @@
         // Delegate does not provide a cell use default one:
         cell = [tableView dequeueReusableCellWithIdentifier: @"CouchUITableDelegate"];
         if (!cell)
-            cell = [[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
-                                          reuseIdentifier: @"CouchUITableDelegate"];
+            cell = [[[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
+                                          reuseIdentifier: @"CouchUITableDelegate"]
+                    autorelease];
     }
     
     cell.textLabel.text = [self labelForRow: row];
