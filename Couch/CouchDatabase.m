@@ -277,7 +277,7 @@ static const NSUInteger kDocRetainLimit = 50;
         if ([[repl source] isEqualToString: myPath] || [[repl target] isEqualToString: myPath])
             return repl;
         else
-            return nil;
+            return (id)nil;
     }];
 }
 
