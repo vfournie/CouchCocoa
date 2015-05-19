@@ -47,10 +47,10 @@ enum {
 - (BOOL) start {
     NSURL* url = _database.URL;
     _trackingRequest = [[NSString stringWithFormat:
-                         @"GET /%@/_changes?feed=continuous&heartbeat=300000&since=%u HTTP/1.1\r\n"
+                         @"GET /%@/_changes?feed=continuous&heartbeat=300000&since=%lu HTTP/1.1\r\n"
                          @"Host: %@\r\n"
                          @"\r\n",
-                         _database.relativePath, _lastSequenceNo, url.host] copy];
+                         _database.relativePath, (unsigned long)_lastSequenceNo, url.host] copy];
     COUCHLOG2(@"CouchChangeTracker: Starting with request:\n%@", _trackingRequest);
     
     /* Why are we using raw TCP streams rather than NSURLConnection? Good question.

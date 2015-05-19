@@ -118,8 +118,8 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
         for (NSString* key in headers)
             [output appendFormat: @"\t%@: %@\n", key, [headers objectForKey: key]];
     } else if (_error) {
-        [output appendFormat: @"\n\tError: (%@, %i) %@\n",
-            _error.domain, _error.code, _error.localizedDescription];
+        [output appendFormat: @"\n\tError: (%@, %li) %@\n",
+            _error.domain, (long)_error.code, _error.localizedDescription];
     }
     return output;
 }
@@ -443,7 +443,7 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
         NSString* message = [NSHTTPURLResponse localizedStringForStatusCode:httpStatus];
         NSDictionary* info = [NSDictionary dictionaryWithObjectsAndKeys:
                               message, NSLocalizedFailureReasonErrorKey,
-                              [NSString stringWithFormat: @"%i %@", httpStatus, message],
+                              [NSString stringWithFormat: @"%li %@", (long)httpStatus, message],
                                 NSLocalizedDescriptionKey,
                               self.URL, NSURLErrorKey,
                               nil];
